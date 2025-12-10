@@ -1,0 +1,18 @@
+services:
+  service1:
+    build: ./service1
+    ports:
+      - "5000:5000"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  service2:
+    build: ./service2
+    ports:
+      - "5001:5001"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
