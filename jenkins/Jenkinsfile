@@ -29,15 +29,16 @@ pipeline {
         stage('Test Services') {
             steps {
                 echo 'Waiting for services to start...'
-                bat "timeout /t 5 /nobreak > nul"
+                // Windows-friendly delay (~5 seconds)
+                bat "ping 127.0.0.1 -n 6 > nul"
 
                 echo 'Testing Service 1...'
                 bat """
                     curl -v http://localhost:5000 || (
                         echo ---- Service 1 logs ----
-                        docker logs aaa-service1-1
+                        docker logs pipeine_docker-service1-1
                         echo ---- Service 2 logs ----
-                        docker logs aaa-service2-1
+                        docker logs pipeine_docker-service2-1
                         exit /b 1
                     )
                 """
@@ -46,9 +47,9 @@ pipeline {
                 bat """
                     curl -v http://localhost:5001 || (
                         echo ---- Service 1 logs ----
-                        docker logs aaa-service1-1
+                        docker logs pipeine_docker-service1-1
                         echo ---- Service 2 logs ----
-                        docker logs aaa-service2-1
+                        docker logs pipeine_docker-service2-1
                         exit /b 1
                     )
                 """
@@ -67,7 +68,7 @@ pipeline {
         }
 
         failure {
-            echo 'Pipeline failed. Check logs.'
+            echo 'Pipeline failed. Check logs above for errors.'
         }
     }
 }
