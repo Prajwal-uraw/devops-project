@@ -18,23 +18,23 @@ pipeline {
             steps {
                 echo 'Building Docker images for service1 and service2...'
                 // Build using docker-compose
-                sh "docker-compose build"
+                bat "docker-compose build"
             }
         }
 
         stage('Run Services') {
             steps {
                 echo 'Starting services...'
-                sh "docker-compose up -d"
+                bat "docker-compose up -d"
             }
         }
 
         stage('Test Services') {
             steps {
                 echo 'Running basic tests...'
-                // Optional: you can add curl or Python requests to test endpoints
-                sh "curl -f http://localhost:5000 || echo 'Service1 failed'"
-                sh "curl -f http://localhost:5001 || echo 'Service2 failed'"
+                // Optional: test endpoints using curl on Windows
+                bat "curl -f http://localhost:5000 || echo Service1 failed"
+                bat "curl -f http://localhost:5001 || echo Service2 failed"
             }
         }
     }
@@ -43,7 +43,7 @@ pipeline {
         always {
             echo 'Cleaning up...'
             // Stop containers after build
-            sh "docker-compose down"
+            bat "docker-compose down"
         }
         success {
             echo 'Pipeline finished successfully!'
