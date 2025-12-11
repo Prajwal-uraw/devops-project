@@ -2,14 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Docker Compose file path
         COMPOSE_FILE = 'docker-compose.yml'
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Pull the code from your GitHub repo
                 git branch: 'main', url: 'https://github.com/Prajwal-uraw/devops-project.git'
             }
         }
@@ -17,7 +15,6 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo 'Building Docker images for service1 and service2...'
-                // Build using docker-compose
                 bat "docker-compose build"
             }
         }
@@ -31,10 +28,30 @@ pipeline {
 
         stage('Test Services') {
             steps {
-                echo 'Running basic tests...'
-                // Optional: test endpoints using curl on Windows
-                bat "curl -f http://localhost:5000 || echo Service1 failed"
-                bat "curl -f http://localhost:5001 || echo Service2 failed"
+                echo 'Waiting for services to start...'
+                bat "timeout /t 5 /nobreak > nul"
+
+                echo 'Testing Service 1...'
+                bat """
+                    curl -v http://localhost:5000 || (
+                        echo ---- Service 1 logs ----
+                        docker logs aaa-service1-1
+                        echo ---- Service 2 logs ----
+                        docker logs aaa-service2-1
+                        exit /b 1
+                    )
+                """
+
+                echo 'Testing Service 2...'
+                bat """
+                    curl -v http://localhost:5001 || (
+                        echo ---- Service 1 logs ----
+                        docker logs aaa-service1-1
+                        echo ---- Service 2 logs ----
+                        docker logs aaa-service2-1
+                        exit /b 1
+                    )
+                """
             }
         }
     }
@@ -42,12 +59,13 @@ pipeline {
     post {
         always {
             echo 'Cleaning up...'
-            // Stop containers after build
             bat "docker-compose down"
         }
+
         success {
             echo 'Pipeline finished successfully!'
         }
+
         failure {
             echo 'Pipeline failed. Check logs.'
         }
